@@ -1,0 +1,84 @@
+services:
+   vprodb:
+      build:
+         # Define o diretório de contexto do build e o Dockerfile usado para criar a imagem deste serviço.
+         # Esse contexto indica ao Docker onde ele deve procurar os arquivos e instruções necessárias para montar a imagem.
+         context: ./Docker-files/db
+      # Nome/tag da imagem que será usada localmente ou enviada para um registro como Docker Hub.
+      # Em projetos reais, esse valor costuma seguir o padrão: <usuario>/<nome-do-projeto>.
+      image: felipebert/vprofiledb
+      # Nome fixo do contêiner para facilitar identificação, troubleshooting e gerenciamento durante o desenvolvimento.
+      container_name: vprodb
+      ports:
+         - "3306:3306"  # Mapeia a porta 3306 do host para a porta 3306 do contêiner do MySQL
+      volumes:
+         # Cria um volume persistente para manter os dados do banco mesmo quando o contêiner é reiniciado ou removido.
+         # /var/lib/mysql é o diretório padrão em que o MySQL armazena seus arquivos de dados.
+         - vprodbdata:/var/lib/mysql
+      environment:
+         # IMPORTANTE: para fins de estudo, esta senha está sendo mantida diretamente no arquivo.
+         # Em ambientes reais, não é uma boa prática armazenar segredos (senhas, tokens, chaves) em arquivos de configuração,
+         # porque eles podem ser versionados em repositórios e expostos indevidamente.
+         # Exemplo de uso mais seguro:
+         # environment:
+         #   - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+         # Nesse caso, o valor fica em um arquivo .env local (ou em um gerenciador de segredos), não no compose.
+         # Para estudo, mantemos o valor aqui como exemplo didático.
+         - MYSQL_ROOT_PASSWORD=vprodbpass
+
+   vprocache01:
+      image: memcached
+      # Nome fixo do contêiner para facilitar controle e identificação do serviço de cache.
+      container_name: vprocache01
+      ports:
+         - "11211:11211"  # Mapeia a porta 11211 do host para a porta 11211 do contêiner do Memcached
+
+   vpromq01:
+      image: rabbitmq
+      # Nome do contêiner para facilitar gestão e acesso ao broker de mensagens.
+      container_name: vpromq01
+      ports:
+         - "5672:5672"  # Mapeia a porta do host para a porta do RabbitMQ dentro do contêiner
+      environment:
+         # Também é uma má prática armazenar credenciais em texto puro no compose em ambientes reais.
+         # Exemplo mais seguro:
+         # environment:
+         #   - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+         #   - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+         # Para estudo, mantemos as credenciais fixas aqui.
+         - RABBITMQ_DEFAULT_USER=guest
+         - RABBITMQ_DEFAULT_PASS=guest
+
+   vproapp:
+      build:
+         # Define o diretório de contexto do build e o Dockerfile usado para gerar a imagem da aplicação.
+         # Esse caminho informa ao Docker onde encontrar os arquivos e instruções da imagem.
+         context: ./Docker-files/app
+      # Nome/tag da imagem da aplicação para uso local ou para publicação em um registro.
+      image: felipebert/vprofileapp
+      # Nome fixo do contêiner para facilitar manutenção e identificação do serviço da aplicação.
+      container_name: vproapp
+      ports:
+         - "8080:8080"  # Mapeia a porta 8080 do host para a porta 8080 da aplicação dentro do contêiner
+      volumes:
+         # Monta um volume persistente para manter arquivos da aplicação ou artefatos da webapp.
+         # /usr/local/tomcat/webapps é o diretório padrão onde o Tomcat armazena aplicações web implantadas.
+         - vproappdata:/usr/local/tomcat/webapps
+
+   vproweb:
+      build:
+         # Define o diretório de contexto do build da imagem do frontend/Nginx.
+         # O Docker usa esse caminho para localizar o Dockerfile e o conteúdo necessário para montar a imagem.
+         context: ./Docker-files/web
+      # Nome da imagem do serviço web, útil para versionamento e distribuição da imagem.
+      image: felipebert/vprofileweb
+      # Nome fixo do contêiner para facilitar operação, diagnóstico e acesso ao serviço web.
+      container_name: vproweb
+      ports:
+         - "80:80"  # Mapeia a porta 80 do host para a porta 80 do contêiner do servidor web
+
+volumes:
+   # Define volumes nomeados para persistência de dados durante o ciclo de vida dos contêineres.
+   # Esses volumes garantem que os dados não sejam perdidos quando o contêiner for recriado.
+   vprodbdata: {}
+   vproappdata: {}
