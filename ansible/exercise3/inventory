@@ -1,12 +1,17 @@
+# Exercise 3: move shared connection settings from each host to a parent group.
+# "all" contains every host; dc_oregon is a custom parent grouping this exercise's
+# web and database groups so they can share settings and be targeted together.
 all:
   hosts:
-    web01: 
+    # ansible_host is the address; the alias is what playbooks and groups use.
+    web01:
       ansible_host: 172.31.3.34
-    web02: 
+    web02:
       ansible_host: 172.31.15.119
-    db01: 
+    db01:
       ansible_host: 172.31.12.251
  
+  # Group membership is a reference to a host already declared under "all".
   children:
     webservers:
       hosts:
@@ -19,6 +24,8 @@ all:
       children:
         webservers:
         dbservers:
+      # Group variables are inherited by hosts in child groups. A more specific
+      # child-group or host variable can override these shared defaults.
       vars:
         ansible_user: ec2-user
         ansible_ssh_private_key_file: client-key.pem

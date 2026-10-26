@@ -1,12 +1,17 @@
+# Exercise 4: the same grouped inventory pattern as exercise 3, used for a web task.
+# "all" is Ansible's built-in group and includes every managed host.
 all:
   hosts:
-    web01: 
+    # Friendly inventory aliases map to the actual network addresses.
+    web01:
       ansible_host: 172.31.3.34
-    web02: 
+    web02:
       ansible_host: 172.31.15.119
-    db01: 
+    db01:
       ansible_host: 172.31.12.251
  
+  # Group references reuse the hosts above, allowing targeted runs such as
+  # --limit webservers without repeating each host's connection details.
   children:
     webservers:
       hosts:
@@ -19,6 +24,9 @@ all:
       children:
         webservers:
         dbservers:
+      # Variables on this parent group are inherited by its child-group hosts.
+      # Keep credentials out of shared files in real environments; use a secure
+      # secret store or Ansible Vault for sensitive values.
       vars:
         ansible_user: ec2-user
         ansible_ssh_private_key_file: client-key.pem

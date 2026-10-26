@@ -1,18 +1,23 @@
+# Exercise 2: add hosts and organize them into reusable groups.
+# The "all" group is Ansible's built-in parent group for every inventory host.
 all:
   hosts:
-    web01: 
+    # Host variables here apply only to the named host.
+    web01:
       ansible_host: 172.31.3.34
       ansible_user: ec2-user
       ansible_ssh_private_key_file: client-key.pem
-    web02: 
+    web02:
       ansible_host: 172.31.15.119
       ansible_user: ec2-user
       ansible_ssh_private_key_file: client-key.pem
-    db01: 
+    db01:
       ansible_host: 172.31.12.251
       ansible_user: ec2-user
       ansible_ssh_private_key_file: client-key.pem
  
+  # Child groups let playbooks target a role instead of listing hosts each time.
+  # Hosts declared above are referenced by alias here; they are not new machines.
   children:
     webservers:
       hosts:
@@ -22,6 +27,7 @@ all:
       hosts:
         db01:
     dc_oregon:
+      # A parent group can combine other groups for broader targeting.
       children:
         webservers:
         dbservers:
