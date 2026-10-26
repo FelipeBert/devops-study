@@ -1,0 +1,41 @@
+---
+# A playbook is an ordered list of plays. This one configures web hosts first,
+# then database hosts, using the groups defined in the inventory.
+- name: WebServer Setup
+  # Target a group rather than individual machines so the same tasks apply to
+  # every host in the webservers inventory group.
+  hosts: webservers
+  # Run privileged tasks through sudo; the remote SSH user must be allowed to
+  # elevate privileges.
+  become: yes
+  tasks:
+    # Ansible modules describe the desired state, making repeated runs safe.
+    - name: Install httpd
+      ansible.builtin.yum:
+        name: httpd
+        # present installs the package only when it is missing.
+        state: present
+
+    - name: Start Httpd Service
+      ansible.builtin.service:
+        name: httpd
+        # started ensures the service is running; enabled starts it at boot.
+        state: started
+        enabled: yes
+
+# This second play targets database hosts separately, so web packages and
+# services are not installed on database servers.
+- name: DBServer Setup
+  hosts: dbservers
+  become: yes
+  tasks:
+    - name: Install Mariadb-server
+      ansible.builtin.yum:
+        name: mariadb-server
+        state: present
+
+    - name: Start Mariadb Service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
