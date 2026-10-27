@@ -1,0 +1,28 @@
+# Inventory aliases are used by groups and plays; ansible_host gives the
+# network address Ansible connects to.
+all:
+  hosts:
+    web01:
+      ansible_host: 172.31.3.34
+    web02:
+      ansible_host: 172.31.15.119
+    db01:
+      ansible_host: 172.31.12.251
+ 
+  # Group hosts by role so a play can target only the required machines.
+  children:
+    webservers:
+      hosts:
+        web01:
+        web02:
+    dbservers:
+      hosts:
+        db01:
+    dc_oregon:
+      # Parent groups can combine roles and provide shared connection defaults.
+      children:
+        webservers:
+        dbservers:
+      vars:
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: client-key.pem

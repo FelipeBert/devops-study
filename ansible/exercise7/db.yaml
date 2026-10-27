@@ -1,0 +1,44 @@
+---
+# This play provisions the database tier only; group membership comes from the
+# inventory, and become enables the administrative operations below.
+- name: DBServer Setup
+  hosts: dbservers
+  become: yes
+  tasks:
+    # Install the database server package before configuring its service.
+    - name: Install Mariadb-server
+      ansible.builtin.yum:
+        name: mariadb-server
+        state: present
+
+    # The MySQL Ansible modules use this Python driver on the managed host.
+    - name: Install PyMysql
+      ansible.builtin.yum:
+        name: python3-PyMySQL
+        state: present
+
+    # Keep MariaDB running and enable it to start automatically at boot.
+    - name: Start Mariadb Service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    # The mysql_db module creates the database if it does not already exist.
+    # A local Unix socket lets the module connect to MariaDB on this same host.
+    - name: Create a new database with name 'bobdata'
+      ansible.mysql.mysql_db:
+        name: bobdata
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+
+    # Create or update the application account and grant it database privileges.
+    # In real environments, store the password in Ansible Vault instead of
+    # keeping a plaintext credential in a playbook.
+    - name: Create database user with name 'vprofile' with all database privileges
+      ansible.mysql.mysql_user:
+        name: vprofile
+        password: 'Admin943'
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock

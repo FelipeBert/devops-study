@@ -1,0 +1,27 @@
+---
+# This play configures every host in the inventory's webservers group.
+- name: WebServer Setup
+  hosts: webservers
+  # Package and file-management tasks need elevated privileges on the hosts.
+  become: yes
+  tasks:
+    # Package modules describe the desired state, so rerunning the play is safe.
+    - name: Install httpd
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    # Ensure httpd is both running now and configured to start after reboot.
+    - name: Start Httpd Service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    # The source file is on the Ansible controller (relative to this playbook).
+    # copy transfers it to the managed host; backup preserves an existing file.
+    - name: Copy index file
+      ansible.builtin.copy:
+       src: files/index.html
+       dest: /var/www/html/index.html
+       backup: yes
