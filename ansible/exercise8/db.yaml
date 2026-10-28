@@ -1,0 +1,61 @@
+---
+# This play targets database hosts from the inventory and enables sudo.
+- name: DBServer Setup
+  hosts: dbservers
+  become: yes
+  # Variables can also be defined here, but this exercise loads shared values
+  # from group_vars/all. Play-level vars take precedence over group vars.
+  #vars:
+    #dbname: eletric
+    #dbuser: current
+    #dbpass: tesla
+  tasks:
+    # debug prints the resolved value, which is useful when learning variable
+    # lookup. Avoid printing secrets in production playbooks or logs.
+    - debug:
+        var: dbuser
+
+    - debug:
+        msg: "The dbname is {{dbname}}"
+
+    # Install MariaDB and the Python driver required by the MySQL modules.
+    - name: Install Mariadb-server
+      ansible.builtin.yum:
+        name: mariadb-server
+        state: present
+
+    - name: Install PyMysql
+      ansible.builtin.yum:
+        name: python3-PyMySQL
+        state: present
+
+    # Ensure the service is running now and starts automatically at boot.
+    - name: Start Mariadb Service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    # Jinja expressions substitute the variable values into module arguments.
+    - name: Create a new database with name defined by variable
+      ansible.mysql.mysql_db:
+        name: "{{dbname}}"
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+
+    # The MySQL user module consumes the same external variables; register
+    # stores its result so a later task can inspect what changed.
+    - name: Create database user with variables with all database privileges
+      ansible.mysql.mysql_user:
+        name: "{{dbuser}}"
+        password: "{{dbpass}}"
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      register: dbout
+
+    # Registered results are structured data and can be referenced by later
+    # tasks, although they may contain details that should not be logged.
+    - name: print dbout variable
+      debug:
+        var: dbout

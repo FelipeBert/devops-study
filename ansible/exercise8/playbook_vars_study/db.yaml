@@ -1,0 +1,59 @@
+---
+# This play shows play-level variables, which apply to tasks for these hosts.
+- name: DBServer Setup
+  hosts: dbservers
+  become: yes
+  # Play vars override group_vars values with the same names.
+  vars:
+    dbname: eletric
+    dbuser: current
+    dbpass: tesla
+  tasks:
+    # debug demonstrates that a variable is resolved from the play's context.
+    - debug:
+        var: dbuser
+
+    - debug:
+        msg: "The dbname is {{dbname}}"
+
+    # Install the database service and Python dependency before using the
+    # Ansible MySQL modules below.
+    - name: Install Mariadb-server
+      ansible.builtin.yum:
+        name: mariadb-server
+        state: present
+
+    - name: Install PyMysql
+      ansible.builtin.yum:
+        name: python3-PyMySQL
+        state: present
+
+    # Ensure MariaDB is running and enabled at boot.
+    - name: Start Mariadb Service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    # Jinja expressions insert the values of the play-level variables.
+    - name: Create a new database with name defined by variable
+      ansible.mysql.mysql_db:
+        name: "{{dbname}}"
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+
+    # register captures the module result for later inspection in the play.
+    - name: Create database user with variables with all database privileges
+      ansible.mysql.mysql_user:
+        name: "{{dbuser}}"
+        password: "{{dbpass}}"
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      register: dbout
+
+    # The registered value is a structured result; avoid exposing sensitive
+    # details if similar output is logged in a real environment.
+    - name: print dbout variable
+      debug:
+        var: dbout

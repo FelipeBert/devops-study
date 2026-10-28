@@ -1,0 +1,27 @@
+# Inventory aliases identify managed hosts; ansible_host provides their
+# network addresses. Groups are used by the plays to select targets.
+all:
+  hosts:
+    web01: 
+      ansible_host: 172.31.3.34
+    web02: 
+      ansible_host: 172.31.15.119
+    db01: 
+      ansible_host: 172.31.12.251
+ 
+  # Role groups support targeted plays; dc_oregon combines both roles.
+  children:
+    webservers:
+      hosts:
+        web01:
+        web02:
+    dbservers:
+      hosts:
+        db01:
+    dc_oregon:
+      children:
+        webservers:
+        dbservers:
+      vars:
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: client-key.pem

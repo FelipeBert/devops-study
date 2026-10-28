@@ -1,0 +1,4 @@
+# Automatically loaded for every host in the inventory's "all" group.
+# A playbook's vars can override these shared defaults.
+USRNM: commonuser
+COMM: variable from groupvars_all file

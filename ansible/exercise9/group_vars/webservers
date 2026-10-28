@@ -1,0 +1,4 @@
+# Automatically loaded for members of the webservers group. These values are
+# more specific than group_vars/all, but can be overridden by host or play vars.
+USRNM: webgroup
+COMM: variable from group_vars/webservers file

@@ -1,0 +1,4 @@
+# Automatically loaded only for the web02 inventory host. Host-specific values
+# override the matching group_vars values; play-level vars have higher priority.
+USRNM: web02user
+COMM: variables from host_vars/web02 file

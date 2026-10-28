@@ -1,0 +1,24 @@
+---
+# This play targets every host and demonstrates playbook variables.
+- name: Understanding vars
+  hosts: all
+  become: yes
+  # Play-level values override same-named group_vars and host_vars values.
+  vars:
+    USRNM: playuser
+    COMM: Variable from playbook
+  tasks:
+    # Create a managed Linux account using the resolved variable values.
+    - name: create user
+      ansible.builtin.user:
+        name: "{{USRNM}}"
+        comment: "{{COMM}}"
+      # Save the module result so later tasks can inspect selected fields.
+      register: usrout
+
+    # These debug tasks show the resulting account name and comment.
+    - debug:
+        var: usrout.name
+
+    - debug:
+        var: usrout.comment

@@ -1,0 +1,5 @@
+# Variables in this file are automatically applied to every host in the
+# inventory's "all" group. Keep secrets in Ansible Vault in real deployments.
+dbname: sky
+dbuser: pilot
+dbpass: airplane
