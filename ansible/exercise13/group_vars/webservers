@@ -1,0 +1,4 @@
+# These values apply to hosts in the webservers group and override matching
+# values from group_vars/all.
+USRNM: webgroup
+COMM: variable from group_vars/webservers file

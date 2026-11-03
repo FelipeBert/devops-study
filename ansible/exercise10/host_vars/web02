@@ -1,0 +1,3 @@
+# Host-specific values apply only to web02 and override matching group vars.
+USRNM: web02user
+COMM: variables from host_vars/web02 file

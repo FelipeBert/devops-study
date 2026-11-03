@@ -1,0 +1,37 @@
+---
+# This play targets every inventory host and configures time synchronization.
+- name: Provisioning servers
+  hosts: all
+  # Package installation and service management require administrator rights.
+  become: yes
+  tasks:
+    # Distribution facts let one play support both CentOS and Ubuntu. The
+    # condition skips this task on hosts running another distribution.
+    - name: Install ntp agent on centos
+      yum:
+        name: chrony
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    # Ubuntu uses apt; update_cache refreshes package metadata before install.
+    - name: Install ntp agent on Ubuntu
+      apt:
+        name: chrony
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    # The Chrony service has different names on these operating systems.
+    - name: Start service on centos
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Start service on ubuntu
+      service:
+        name: chrony
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"

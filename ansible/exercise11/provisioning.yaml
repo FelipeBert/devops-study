@@ -1,0 +1,61 @@
+---
+# This play runs against every host and demonstrates looping over packages.
+- name: Provisioning servers
+  hosts: all
+  become: yes
+  tasks:
+    # "item" contains the current package name from the loop; the condition
+    # ensures this yum task runs only on CentOS hosts.
+    - name: Install ntp agent on centos
+      yum:
+        name: "{{item}}"
+        state: present
+      when: ansible_distribution == "CentOS"
+      loop:
+        - chrony
+        - wget
+        - git
+        - zip
+        - unzip
+
+    # Install the same package list on Ubuntu with apt and refresh its package
+    # index before installing.
+    - name: Install ntp agent on Ubuntu
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      loop:
+        - chrony
+        - wget
+        - git
+        - zip
+        - unzip
+
+    # This separate task illustrates a single-package install with apt.
+    - name: Install ntp agent on Ubuntu
+      apt:
+        name: chrony
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    # This task is incomplete as written: the service module needs at least a
+    # service name and desired state. The configured tasks below show both.
+    - name: Start service on centos
+      service:
+
+    - name: Start service on centos
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Start service on ubuntu
+      service:
+        name: chrony
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"

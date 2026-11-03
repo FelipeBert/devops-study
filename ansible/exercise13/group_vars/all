@@ -1,0 +1,8 @@
+# Shared variables automatically apply to every host in the inventory.
+# The NTP source names are substituted into the Chrony templates.
+USRNM: commonuser
+COMM: variable from groupvars_all file
+ntp0: a.st1.ntp.br
+ntp1: e.st1.ntp.br
+ntp2: c.st1.ntp.br
+ntp3: d.st1.ntp.br

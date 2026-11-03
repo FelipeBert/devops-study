@@ -1,0 +1,3 @@
+# Shared variables automatically apply to every host in the inventory.
+USRNM: commonuser
+COMM: variable from groupvars_all file
