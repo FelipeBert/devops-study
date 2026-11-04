@@ -1,0 +1,18 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for post-install
+# A handler runs at the end of the play only when a task notifies its name,
+# avoiding a service restart when the configuration did not change.
+- name: reStart service on centos
+  service:
+    name: chronyd
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: reStart service on ubuntu
+  service:
+    name: chrony
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"

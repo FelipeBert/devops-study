@@ -1,0 +1,11 @@
+---
+# A play can include a role to keep reusable provisioning logic out of the
+# playbook. Ansible loads the role's tasks, handlers, templates, and files.
+- name: Provisioning servers
+  hosts: all
+  # The role installs packages and writes system configuration, so it needs
+  # elevated privileges on the managed hosts.
+  become: yes
+  roles:
+    # This role is resolved from the roles/ directory beside this playbook.
+    - post-install

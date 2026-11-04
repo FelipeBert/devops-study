@@ -1,0 +1,5 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for post-install
+# This file is empty: role-specific settings for this exercise are provided
+# through defaults and overridden by the calling playbook.

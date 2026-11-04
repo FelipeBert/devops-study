@@ -1,0 +1,99 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Role tasks run when the role is included from a playbook.
+# Use distribution facts to select the package manager and service name.
+- name: Install ntp agent on centos
+  yum:
+    # item is the current package from the loop below.
+    name: "{{item}}"
+    state: present
+  when: ansible_distribution == "CentOS"
+  loop:
+    - chrony
+    - wget
+    - git
+    - zip
+    - unzip
+
+# Ubuntu uses apt; update_cache refreshes repository metadata before install.
+- name: Install ntp agent on Ubuntu
+  apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+  loop:
+    - chrony
+    - wget
+    - git
+    - zip
+    - unzip
+
+# This repeats the Chrony package install already included in the Ubuntu loop;
+# it is idempotent, but can be useful as an explicit single-package example.
+- name: Install ntp agent on Ubuntu
+  apt:
+    name: chrony
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+# The following task is intentionally incomplete as written: service needs a
+# name and a desired state. The configured tasks below demonstrate both.
+- name: Start service on centos
+  service:
+
+# CentOS calls the Chrony daemon chronyd; enable it to start at boot as well.
+- name: Start service on centos
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+# Ubuntu calls the service chrony.
+- name: Start service on ubuntu
+  service:
+    name: chrony
+    state: started
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"
+
+# copy with content writes a literal message to the managed host.
+- name: Banner file
+  ansible.builtin.copy:
+    content: '# This server is managed by ansible. No manual changes please.'
+    dest: /etc/motd
+
+# file state=directory ensures the configured directory exists on each host.
+- name: Create a folder
+  ansible.builtin.file:
+    path: "{{mydir}}"
+    state: directory
+
+# template renders Jinja variables from the role's variable context on the
+# controller, then installs the rendered configuration on the managed host.
+- name: Deploy ntp agent conf on centos
+  ansible.builtin.template:
+    src: ntpconf_centos.j2
+    dest: /etc/chrony.conf
+    backup: yes
+  when: ansible_distribution == "CentOS"
+  notify:
+    - reStart service on centos
+
+# Ubuntu uses a different Chrony configuration path and matching handler.
+- name: Deploy ntp agent conf on ubuntu
+  ansible.builtin.template:
+    src: ntpconf_ubuntu.j2
+    dest: /etc/chrony/chrony.conf
+    backup: yes
+  when: ansible_distribution == "Ubuntu"
+  notify:
+    - reStart service on ubuntu
+
+# files/ contains static role assets; copy transfers this one without templating.
+- name: Dump file
+  copy:
+    src: myfile.txt
+    dest: /tmp/myfile.txt

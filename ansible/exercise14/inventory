@@ -1,0 +1,31 @@
+# Host aliases are used in groups and plays; ansible_host is the SSH address.
+all:
+  hosts:
+    web01:
+      ansible_host: 172.31.3.34
+    web02:
+      ansible_host: 172.31.15.119
+    web03:
+      ansible_host: 172.31.33.68
+      ansible_user: ubuntu
+    db01:
+      ansible_host: 172.31.12.251
+
+  # Role groups let plays select web or database hosts by function.
+  children:
+    webservers:
+      hosts:
+        web01:
+        web02:
+        web03:
+    dbservers:
+      hosts:
+        db01:
+    dc_oregon:
+      # The parent group combines both roles and shares their SSH defaults.
+      children:
+        webservers:
+        dbservers:
+      vars:
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: client-key.pem

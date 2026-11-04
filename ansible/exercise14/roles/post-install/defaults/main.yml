@@ -1,0 +1,5 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for post-install
+# Role defaults are low-precedence values that playbooks or inventories can
+# override when customizing the role.

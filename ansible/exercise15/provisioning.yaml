@@ -1,0 +1,14 @@
+---
+# This play delegates reusable setup to a role rather than listing each task here.
+- name: Provisioning servers
+  hosts: all
+  become: yes
+  roles:
+    # Role parameters override the role's default values for this play.
+    - role: post-install
+      vars:
+        # These values are substituted into the role's Chrony templates.
+        ntp0: 0.south-america.pool.ntp.org
+        ntp1: 2.ar.pool.ntp.org
+        ntp2: 1.south-america.pool.ntp.org
+        ntp3: 0.us.pool.ntp.org

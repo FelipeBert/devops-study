@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for post-install
+# Defaults are role inputs that callers can override; exercise 15 supplies
+# NTP server values in the playbook's role vars.
+USRNM: commonuser
+COMM: variable from groupvars_all file
+ntp0: a.st1.ntp.br
+ntp1: e.st1.ntp.br
+ntp2: c.st1.ntp.br
+ntp3: d.st1.ntp.br
+mydir: /opt/dir22
