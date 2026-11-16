@@ -10,6 +10,8 @@ kubectl describe namespace <namespace>
 
 # Create a namespace imperatively.
 kubectl create namespace <namespace>
+# "ns" is the short alias for "namespace".
+kubectl create ns <namespace>
 
 # List resources in a namespace, or Pods across all namespaces.
 kubectl get all -n <namespace>
@@ -18,6 +20,7 @@ kubectl get pods --all-namespaces
 # Target a namespace for one command.
 kubectl get pods -n <namespace>
 kubectl apply -n <namespace> -f .\pod1.yaml
+kubectl get pod <pod-name> -n <namespace>
 
 # Set a default namespace on the current context.
 kubectl config set-context --current --namespace=<namespace>
