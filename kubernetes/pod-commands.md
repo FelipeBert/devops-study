@@ -12,8 +12,8 @@ kubectl get pods --all-namespaces
 kubectl get pods -o wide
 
 # Inspect one Pod with its node/IP columns or its full YAML definition.
-kubectl get pod nginx12 -o wide
-kubectl get pod nginx12 -o yaml
+kubectl get pod <pod-name> -o wide
+kubectl get pod <pod-name> -o yaml
 
 # Inspect a Pod's scheduling, status, events, and configuration.
 kubectl describe pod <pod-name>
@@ -27,11 +27,11 @@ kubectl run nginx --image=nginx:stable
 # Create or update Pods described in a YAML manifest.
 kubectl apply -f .\pod1.yaml
 
-# pod1.yaml sets metadata.namespace to kubekart, so that namespace must exist
-# before applying the manifest (see namespace-commands.md).
+# The sample manifest sets metadata.namespace, so that namespace must exist
+# before applying it (see namespace-commands.md).
 
 # Target a Pod by name within a specific namespace.
-kubectl get pod nginx12 -n kubekart
+kubectl get pod <pod-name> -n <namespace>
 
 # Read container output; add -f to follow new log lines.
 kubectl logs <pod-name>
