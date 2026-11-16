@@ -1,0 +1,20 @@
+# Core Kubernetes API version for a Pod resource.
+apiVersion: v1
+# kind selects the resource type Kubernetes should create.
+kind: Pod
+metadata:
+  # Names must be unique within a namespace.
+  name: nginx12
+  # The namespace must already exist; it scopes this Pod and its name.
+  namespace: kubekart
+spec:
+  # A Pod groups one or more tightly coupled containers on the same node.
+  containers:
+    - name: nginx
+      # Use an explicit image tag so the image version is clear.
+      image: nginx:1.14.2
+      ports:
+        # Documents the container's listening port; it does not expose the Pod
+        # outside the cluster. Use a Service for stable network access.
+        - containerPort: 80
+
