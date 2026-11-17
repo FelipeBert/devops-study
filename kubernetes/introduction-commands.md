@@ -1,37 +1,37 @@
-# Kubernetes introduction: essential commands
+# Kubernetes: comandos essenciais para começar
 
-`kubectl` is the command-line client for the Kubernetes API. These commands
-inspect a cluster and apply declarative manifests.
+`kubectl` é o cliente de linha de comando da API do Kubernetes. Os comandos
+abaixo permitem inspecionar um cluster e aplicar manifestos declarativos.
 
 ```powershell
-# Confirm the kubectl client is installed.
+# Confirmar que o cliente kubectl está instalado.
 kubectl version --client
 
-# Check which cluster and API endpoint the current context points to.
+# Verificar para qual cluster e endpoint da API o contexto atual aponta.
 kubectl cluster-info
 
-# List cluster nodes and their readiness.
+# Listar os nós do cluster e verificar se estão prontos.
 kubectl get nodes
 
-# List common resources across all namespaces.
+# Listar recursos comuns em todos os namespaces.
 kubectl get all --all-namespaces
 
-# List available API resource kinds and their short names.
+# Listar os tipos de recursos da API disponíveis e seus nomes abreviados.
 kubectl api-resources
 
-# Explain a resource's schema and supported fields.
+# Consultar o esquema de um recurso e os campos disponíveis.
 kubectl explain pod
 kubectl explain pod.spec.containers
 
-# Create or update resources described by a manifest (declarative workflow).
+# Criar ou atualizar recursos descritos em um manifesto (fluxo declarativo).
 kubectl apply -f .\pod1.yaml
 
-# Inspect what changed in a manifest before applying it.
+# Conferir as diferenças antes de aplicar o manifesto.
 kubectl diff -f .\pod1.yaml
 
-# Display the current client and server versions.
+# Exibir as versões atuais do cliente e do servidor.
 kubectl version
 ```
 
-`kubectl get` is a quick overview; use `kubectl describe` for events and
-diagnostic details about a specific resource.
+`kubectl get` oferece uma visão rápida dos recursos. Use `kubectl describe`
+para consultar eventos e detalhes de diagnóstico de um recurso específico.

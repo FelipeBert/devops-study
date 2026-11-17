@@ -1,13 +1,13 @@
-# NodePort Service
+# Service do tipo NodePort
 
-A Kubernetes Service gives a stable way to reach a changing set of Pods. A
-`NodePort` Service also exposes that Service on a port of each cluster node.
-It is useful for learning and simple access, but production applications
-typically use an Ingress or a cloud `LoadBalancer` where appropriate.
+Um Service do Kubernetes oferece um endereço estável para acessar Pods que
+podem mudar. Um Service `NodePort` também expõe esse Service em uma porta de
+cada nó do cluster. É útil para estudo e acesso simples; em produção,
+normalmente se usa um Ingress ou um `LoadBalancer` de nuvem, conforme o caso.
 
-## Example manifest
+## Exemplo de manifesto
 
-Save this as `service-defs.yml`:
+Salve como `service-defs.yml`:
 
 ```yaml
 apiVersion: v1
@@ -25,7 +25,8 @@ spec:
     app: frontend
 ```
 
-The Service selector must match labels on the target Pods, for example:
+O seletor do Service precisa corresponder às labels dos Pods de destino, por
+exemplo:
 
 ```yaml
 metadata:
@@ -33,129 +34,132 @@ metadata:
     app: frontend
 ```
 
-If no Pods have the matching label (or no matching Pods are ready), the
-Service has no usable backends. Check the Service's EndpointSlices when
-troubleshooting.
+Se nenhum Pod tiver a label correspondente (ou se nenhum Pod correspondente
+estiver pronto), o Service não terá backends utilizáveis. Ao investigar o
+problema, consulte os EndpointSlices do Service.
 
-## What the port fields mean
+## Significado dos campos de porta
 
-| Field | Example | Purpose |
+| Campo | Exemplo | Finalidade |
 | --- | ---: | --- |
-| `targetPort` | `80` | Port on the selected Pod/container that receives traffic. |
-| `port` | `80` | Port clients use on the Kubernetes Service's stable ClusterIP. |
-| `nodePort` | `30005` | Port opened on each node IP for access from outside the cluster. |
-| `protocol` | `TCP` | Transport protocol; TCP is also the default when omitted. |
+| `targetPort` | `80` | Porta do Pod/container selecionado que recebe o tráfego. |
+| `port` | `80` | Porta usada pelos clientes no ClusterIP estável do Service. |
+| `nodePort` | `30005` | Porta aberta no IP de cada nó para acesso externo ao cluster. |
+| `protocol` | `TCP` | Protocolo de transporte; TCP também é o padrão quando omitido. |
 
-Traffic to `<node-ip>:30005` is forwarded by the Service to a selected Pod's
-port `80`. The Service also gets a ClusterIP, so in-cluster clients can use
-`<service-name>:80`. `nodePort` is normally allocated automatically if it is
-omitted; when specified, it must be available and within the cluster's
-configured NodePort range (commonly `30000-32767`).
+O Service encaminha o tráfego de `<node-ip>:30005` para a porta `80` de um Pod
+selecionado. O Service também recebe um ClusterIP, então clientes dentro do
+cluster podem usar `<service-name>:80`. Se `nodePort` for omitido, ele
+normalmente será alocado automaticamente. Quando especificado, precisa estar
+disponível e dentro do intervalo configurado para NodePort (comumente
+`30000-32767`).
 
-## Apply and inspect
+## Aplicar e inspecionar
 
-`kubectl apply` is the declarative workflow: create the Service if absent or
-update it to match the manifest.
+`kubectl apply` segue o fluxo declarativo: cria o Service se ele não existir
+ou o atualiza para corresponder ao manifesto.
 
 ```powershell
-# Create the Service once from the manifest.
+# Criar o Service uma vez a partir do manifesto.
 kubectl create -f .\service-defs.yml
 
-# Create or update it declaratively; prefer this for repeatable changes.
+# Criar ou atualizar declarativamente; prefira para mudanças repetíveis.
 kubectl apply -f .\service-defs.yml
 
-# List Services in the current namespace; "svc" is short for "services".
+# Listar Services no namespace atual; "svc" abrevia "services".
 kubectl get svc
 kubectl get svc <service-name>
 
-# Inspect the selector, ports, and related events.
+# Inspecionar o seletor, as portas e os eventos relacionados.
 kubectl describe svc <service-name>
 
-# Confirm matching Pods and their labels.
+# Confirmar quais Pods correspondem ao seletor e quais labels possuem.
 kubectl get pods -l app=frontend -o wide
 
-# List Services and legacy Endpoints together; "ep" is short for "endpoints".
+# Listar Services e Endpoints legados juntos; "ep" abrevia "endpoints".
 kubectl get svc,ep
 
-# EndpointSlices are the modern view of a Service's backend addresses.
+# EndpointSlices são a forma atual de consultar os endereços dos backends.
 kubectl get endpointslice -l kubernetes.io/service-name=<service-name>
 ```
 
-Unlike `apply`, `create` reports an error if the Service already exists and
-does not update it. Choose one of these commands when first creating a Service;
-use `apply` when you want to safely reapply changes.
+Ao contrário de `apply`, `create` retorna erro se o Service já existir e não
+o atualiza. Escolha um dos comandos para a criação inicial; use `apply` para
+reaplicar mudanças com segurança.
 
-## Reading the sample output
+## Como interpretar a saída de exemplo
 
-- `TYPE NodePort` confirms the Service is exposed using a node port.
-- `CLUSTER-IP 10.110.3.28` is the Service's internal, stable cluster address.
-- `EXTERNAL-IP <none>` is expected: a NodePort does not allocate a cloud
-  load-balancer IP.
-- `PORT(S) 80:30005/TCP` means Service port `80` is mapped to node port `30005`
-  using TCP.
-- `Selector: app=frontend` identifies the Pod label the Service routes to.
-- `TargetPort: 80/TCP` is the destination port on selected Pods.
-- `NodePort: 30005/TCP` is the externally reachable port on each node.
-- `Endpoints: 172.17.0.4:80` is a backend Pod address and port at the time of
-  the command. Pod IPs can change, so clients should use the Service rather
-  than depend on this address.
+- `TYPE NodePort` confirma que o Service é exposto por uma porta dos nós.
+- `CLUSTER-IP 10.110.3.28` é o endereço interno e estável do Service no cluster.
+- `EXTERNAL-IP <none>` é esperado: um NodePort não cria um IP de
+  balanceador de carga na nuvem.
+- `PORT(S) 80:30005/TCP` indica que a porta `80` do Service está associada à
+  porta NodePort `30005`, usando TCP.
+- `Selector: app=frontend` identifica a label dos Pods para os quais o Service
+  encaminha o tráfego.
+- `TargetPort: 80/TCP` é a porta de destino nos Pods selecionados.
+- `NodePort: 30005/TCP` é a porta acessível em cada nó.
+- `Endpoints: 172.17.0.4:80` é o endereço e a porta de um Pod backend naquele
+  momento. IPs de Pods podem mudar; clientes devem usar o Service, não esse
+  endereço diretamente.
 
-Exact ClusterIP, endpoint IPs, and output formatting vary by cluster and run.
-The `kubernetes` Service shown by `kubectl get svc` is the cluster's built-in
-API Service, not part of this example.
+O ClusterIP, os IPs dos endpoints e a formatação da saída variam entre
+clusters e execuções. O Service `kubernetes` exibido por `kubectl get svc` é
+o Service de API integrado ao cluster, não faz parte deste exemplo.
 
-## Test access
+## Testar o acesso
 
-On a network that can reach the nodes, find a node address and request the
-NodePort. The node IP must be reachable and any firewall or cloud security
-rules must allow the port.
+Em uma rede que alcance os nós, encontre o endereço de um deles e acesse a
+NodePort. O IP do nó precisa estar acessível, e as regras de firewall ou de
+segurança na nuvem devem permitir essa porta.
 
 ```powershell
-# List node addresses; choose an address reachable from your machine.
+# Listar os endereços dos nós; escolha um acessível a partir da sua máquina.
 kubectl get nodes -o wide
 
-# Replace <node-ip> with a reachable node address.
+# Substituir <node-ip> por um endereço de nó acessível.
 curl.exe http://<node-ip>:30005
 ```
 
-For Minikube, use its helper to get a URL appropriate to the local driver:
+No Minikube, use este comando para obter uma URL adequada ao driver local:
 
 ```powershell
 minikube service <service-name> --url
 ```
 
-## Pod IPs and port forwarding
+## IPs dos Pods e encaminhamento de portas
 
-The Service selector determines which Pods receive traffic. List matching
-Pods with their IP and node information; this is more reliable than parsing
-human-readable `describe` output with shell-specific tools such as `grep`.
+O seletor do Service determina quais Pods recebem tráfego. Liste os Pods
+correspondentes com seus IPs e nós; isso é mais confiável do que analisar a
+saída legível de `describe` com ferramentas de shell como `grep`.
 
 ```powershell
-# Show Pod IPs and nodes for Pods selected by this Service.
+# Exibir os IPs e os nós dos Pods selecionados por este Service.
 kubectl get pods -l app=frontend -o wide
 
-# Inspect one selected Pod and its events.
+# Inspecionar um Pod selecionado e seus eventos.
 kubectl describe pod <pod-name>
 ```
 
-Port forwarding is a separate access method from NodePort. It creates a
-temporary connection through the Kubernetes API server from a local port to
-the Service port; it does not change the Service type or `nodePort`.
+O encaminhamento de portas é diferente do NodePort. Ele cria uma conexão
+temporária, via servidor da API Kubernetes, de uma porta local para a porta do
+Service; não altera o tipo do Service nem o `nodePort`.
 
 ```powershell
-# Forward local port 30001 to the Service's port 8090.
+# Encaminhar a porta local 30001 para a porta 8090 do Service.
 kubectl port-forward svc/<service-name> 30001:8090
 
-# Optional: explicitly listen on every local network interface.
+# Opcional: escutar explicitamente em todas as interfaces de rede locais.
 kubectl port-forward --address 0.0.0.0 svc/<service-name> 30001:8090
 ```
 
-The mapping format is `<local-port>:<service-port>`. The history's Service
-used port `8090`; the example manifest in this guide uses Service port `80`,
-so for that manifest the equivalent command is
+O formato do mapeamento é `<porta-local>:<porta-do-service>`. O Service do
+histórico usava a porta `8090`; o manifesto de exemplo deste guia usa a porta
+`80`. Portanto, para esse manifesto, o comando equivalente é
 `kubectl port-forward svc/<service-name> 30001:80`.
 
-The command stays in the foreground until stopped (Ctrl+C). By default,
-port-forward listens only on localhost. `--address 0.0.0.0` listens on all
-interfaces and may expose the application to other machines; use it only when
-that exposure is intentional and network access is controlled.
+O comando permanece em primeiro plano até ser interrompido (Ctrl+C). Por
+padrão, `port-forward` escuta apenas em localhost. `--address 0.0.0.0` escuta
+em todas as interfaces e pode expor a aplicação a outras máquinas; use essa
+opção somente quando a exposição for intencional e o acesso à rede estiver
+controlado.

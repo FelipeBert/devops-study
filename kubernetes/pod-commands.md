@@ -1,56 +1,56 @@
-# Pods: essential commands
+# Pods: comandos essenciais
 
-Pods are the smallest deployable Kubernetes unit. A Pod can contain multiple
-containers that share networking and attached volumes.
+Pods são a menor unidade implantável do Kubernetes. Um Pod pode conter vários
+containers que compartilham a rede e os volumes associados.
 
 ```powershell
-# "pod" is accepted as a singular alias for "pods".
-# List Pods in the current namespace, or in every namespace.
+# "pod" também é aceito como forma singular de "pods".
+# Listar Pods no namespace atual ou em todos os namespaces.
 kubectl get pod
 kubectl get pods
 kubectl get pods --all-namespaces
 kubectl get pods -o wide
 
-# Inspect one Pod with its node/IP columns or its full YAML definition.
+# Consultar um Pod com colunas de nó/IP ou exibir sua definição YAML completa.
 kubectl get pod <pod-name> -o wide
 kubectl get pod <pod-name> -o yaml
 
-# Inspect a Pod's scheduling, status, events, and configuration.
+# Inspecionar agendamento, estado, eventos e configuração de um Pod.
 kubectl describe pod <pod-name>
 
-# describe is a human-readable diagnostic view and does not support "-o yaml".
-# Use "kubectl get pod <pod-name> -o yaml" when you need the YAML representation.
+# describe apresenta informações de diagnóstico e não aceita "-o yaml".
+# Para obter YAML, use "kubectl get pod <pod-name> -o yaml".
 
-# Create a simple Pod imperatively for practice.
+# Criar um Pod simples de forma imperativa, para praticar.
 kubectl run nginx --image=nginx:stable
 
-# Create or update Pods described in a YAML manifest.
+# Criar ou atualizar Pods descritos em um manifesto YAML.
 kubectl apply -f .\pod1.yaml
 
-# The sample manifest sets metadata.namespace, so that namespace must exist
-# before applying it (see namespace-commands.md).
+# O manifesto de exemplo define metadata.namespace; esse namespace precisa
+# existir antes da aplicação (consulte namespace-commands.md).
 
-# Target a Pod by name within a specific namespace.
+# Consultar um Pod pelo nome em um namespace específico.
 kubectl get pod <pod-name> -n <namespace>
 
-# Read container output; add -f to follow new log lines.
+# Ler a saída de um container; use -f para acompanhar novas linhas.
 kubectl logs <pod-name>
 kubectl logs -f <pod-name>
 
-# For a multi-container Pod, select the container explicitly.
+# Em um Pod com vários containers, indique o container desejado.
 kubectl logs <pod-name> -c <container-name>
 
-# Run a command inside a container (interactive shell example).
+# Executar um comando dentro do container (exemplo de shell interativo).
 kubectl exec -it <pod-name> -- sh
 
-# Delete a Pod by name or remove resources declared in a manifest.
+# Excluir um Pod pelo nome ou remover recursos declarados em um manifesto.
 kubectl delete pod <pod-name>
 kubectl delete -f .\pod1.yaml
 ```
 
-Pods created directly are not automatically recreated if deleted. For
-long-lived workloads, use a Deployment; expose network access through a
-Service rather than relying on a Pod IP or `containerPort` alone.
+Pods criados diretamente não são recriados automaticamente quando excluídos.
+Para workloads duradouros, use um Deployment. Para acesso pela rede, prefira
+um Service em vez de depender do IP do Pod ou apenas de `containerPort`.
 
-`vim`, `clear`, and `history` in a terminal session are shell utilities, not
-Kubernetes commands. Their availability and syntax depend on the shell/OS.
+`vim`, `clear` e `history` são utilitários do shell, não comandos Kubernetes.
+A disponibilidade e a sintaxe dependem do shell e do sistema operacional.

@@ -1,13 +1,13 @@
-# ClusterIP Service
+# Service do tipo ClusterIP
 
-A `ClusterIP` Service provides a stable virtual IP and DNS name for reaching
-matching Pods from inside the Kubernetes cluster. It is the default Service
-type and is not directly reachable from outside the cluster.
+Um Service `ClusterIP` fornece um IP virtual e um nome DNS estáveis para
+acessar Pods correspondentes de dentro do cluster Kubernetes. É o tipo padrão
+de Service e não pode ser acessado diretamente de fora do cluster.
 
-## Example manifests
+## Exemplos de manifestos
 
-The Service and Pod can be saved as separate files. Apply both in the same
-namespace so the Service can select the Pod.
+O Service e o Pod podem ser salvos em arquivos separados. Aplique ambos no
+mesmo namespace para que o Service possa selecionar o Pod.
 
 ### `tom-svc-clusterip.yml`
 
@@ -45,68 +45,67 @@ spec:
           containerPort: 8080
 ```
 
-The Service selector `app: backend` matches the same label on the Pod. The
-additional `project: infinity` label is useful for organizing or selecting the
-Pod, but it does not affect this Service because that label is not in the
-Service selector.
+O seletor do Service `app: backend` corresponde à mesma label no Pod. A label
+adicional `project: infinity` pode ajudar a organizar ou selecionar o Pod,
+mas não afeta este Service porque não faz parte de seu seletor.
 
-## How the ports and address work
+## Como funcionam as portas e o endereço
 
-| Field | Example | Purpose |
+| Campo | Exemplo | Finalidade |
 | --- | ---: | --- |
-| `port` | `8080` | Port clients use on the Service. |
-| `targetPort` | `8080` | Port on each selected Pod that receives traffic. |
-| `containerPort` | `8080` | Documents the port the container listens on; it does not expose the Pod. |
-| `protocol` | `TCP` | Transport protocol used by the Service. |
+| `port` | `8080` | Porta usada pelos clientes no Service. |
+| `targetPort` | `8080` | Porta de cada Pod selecionado que recebe o tráfego. |
+| `containerPort` | `8080` | Documenta a porta em que o container escuta; não expõe o Pod. |
+| `protocol` | `TCP` | Protocolo de transporte usado pelo Service. |
 
-In this example, a client inside the cluster connects to
-`app-service:8080`. Kubernetes routes the connection to port `8080` on one of
-the ready Pods matching `app: backend`. The Service receives a ClusterIP
-automatically; it is stable for the lifetime of the Service, while Pod IPs
-can change.
+Neste exemplo, um cliente dentro do cluster se conecta a
+`app-service:8080`. O Kubernetes encaminha a conexão para a porta `8080` de
+um dos Pods prontos que correspondem a `app: backend`. O Service recebe um
+ClusterIP automaticamente, estável durante sua existência, enquanto os IPs
+dos Pods podem mudar.
 
-Within the same namespace, clients can use the Service name. From another
-namespace, use a qualified DNS name such as
+No mesmo namespace, os clientes podem usar o nome do Service. A partir de
+outro namespace, use um nome DNS qualificado, como
 `app-service.<namespace>.svc.cluster.local`.
 
-## Apply and inspect
+## Aplicar e inspecionar
 
 ```powershell
-# Create or update the Pod and Service from their manifests.
+# Criar ou atualizar o Pod e o Service a partir de seus manifestos.
 kubectl apply -f .\tom-app.yml
 kubectl apply -f .\tom-svc-clusterip.yml
 
-# Find the Service's internal IP and port.
+# Consultar o IP e a porta internos do Service.
 kubectl get svc <service-name>
 kubectl describe svc <service-name>
 
-# Check whether the selector matches Pods and whether they are ready.
+# Verificar se o seletor encontra Pods e se eles estão prontos.
 kubectl get pods -l app=backend --show-labels -o wide
 
-# Inspect the Service's backend addresses.
+# Consultar os endereços dos backends do Service.
 kubectl get endpointslice -l kubernetes.io/service-name=<service-name>
 ```
 
-If the Service has no ready endpoints, check that the Pod has the expected
-label, is in the same namespace, and is ready. `Endpoints` or `EndpointSlices`
-show the backend Pod addresses selected by the Service.
+Se o Service não tiver endpoints prontos, verifique se o Pod possui a label
+esperada, está no mesmo namespace e está pronto. `Endpoints` ou
+`EndpointSlices` exibem os endereços dos Pods selecionados pelo Service.
 
-## Test access
+## Testar o acesso
 
-From another Pod in the cluster that has a suitable network client, request
-the Service by DNS name:
+De outro Pod no cluster que tenha um cliente de rede adequado, acesse o
+Service pelo nome DNS:
 
 ```text
 http://<service-name>:8080
 ```
 
-For local development, `kubectl port-forward` can temporarily tunnel a local
-port to the Service:
+Para desenvolvimento local, `kubectl port-forward` pode criar um túnel
+temporário de uma porta local para o Service:
 
 ```powershell
 kubectl port-forward svc/<service-name> 8080:8080
 ```
 
-Then access `http://127.0.0.1:8080` on the machine running `kubectl`. This
-does not change the Service type or make its ClusterIP externally reachable;
-the forwarding process must stay running.
+Depois, acesse `http://127.0.0.1:8080` na máquina que executa `kubectl`. Isso
+não altera o tipo do Service nem torna seu ClusterIP acessível externamente;
+o processo de encaminhamento precisa continuar em execução.

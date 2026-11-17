@@ -1,13 +1,14 @@
-# LoadBalancer Service
+# Service do tipo LoadBalancer
 
-A Kubernetes `LoadBalancer` Service asks the cluster's infrastructure
-integration (commonly a cloud provider) to provision an external load balancer
-and route traffic to matching Pods. It provides a stable external address
-without requiring clients to connect directly to a node IP.
+Um Service `LoadBalancer` solicita à integração de infraestrutura do cluster
+(geralmente um provedor de nuvem) a criação de um balanceador externo e o
+encaminhamento do tráfego para os Pods correspondentes. Ele fornece um
+endereço externo estável sem exigir que os clientes acessem diretamente um IP
+de nó.
 
-## Example manifest
+## Exemplo de manifesto
 
-Save this as `loadbalancer-service.yaml`:
+Salve como `loadbalancer-service.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -24,79 +25,83 @@ spec:
       targetPort: 80
 ```
 
-The selector must match labels on the application Pods, such as
-`app: frontend`. `port` is the Service port clients use; `targetPort` is the
-port on selected Pods.
+O seletor precisa corresponder às labels dos Pods da aplicação, como
+`app: frontend`. `port` é a porta do Service usada pelos clientes;
+`targetPort` é a porta dos Pods selecionados.
 
-## Create and inspect the Service
+## Criar e inspecionar o Service
 
 ```powershell
-# Create or update the Service from its manifest.
+# Criar ou atualizar o Service a partir do manifesto.
 kubectl apply -f .\loadbalancer-service.yaml
 
-# Watch the Service while the infrastructure provisions its external address.
+# Acompanhar o Service enquanto a infraestrutura provisiona o endereço externo.
 kubectl get svc <service-name> --watch
 
-# List Services or inspect this Service's selector, ports, and events.
+# Listar Services ou inspecionar o seletor, as portas e os eventos deste Service.
 kubectl get svc
 kubectl describe svc <service-name>
 
-# Check whether the selector finds ready application Pods.
+# Verificar se o seletor encontra Pods da aplicação prontos.
 kubectl get pods -l app=frontend -o wide
 kubectl get endpointslice -l kubernetes.io/service-name=<service-name>
 ```
 
-When provisioning completes, `kubectl get svc` typically shows
-`TYPE LoadBalancer` and an `EXTERNAL-IP` address or hostname. It can remain
-`<pending>` if the cluster has no load-balancer integration, or provisioning
-is still in progress. A `LoadBalancer` Service also has a ClusterIP for
-in-cluster traffic; some implementations additionally allocate a NodePort.
+Quando o provisionamento terminar, `kubectl get svc` normalmente mostrará
+`TYPE LoadBalancer` e um endereço ou hostname em `EXTERNAL-IP`. O valor pode
+continuar como `<pending>` se o cluster não tiver integração com balanceador
+ou se o provisionamento ainda estiver em andamento. Um Service
+`LoadBalancer` também possui um ClusterIP para tráfego interno; algumas
+implementações alocam ainda um NodePort.
 
-To test an address that is reachable from your machine:
+Para testar um endereço acessível a partir da sua máquina:
 
 ```powershell
 curl.exe http://<external-ip-or-hostname>:80
 ```
 
-Replace the placeholder with the address shown by `kubectl get svc`. Network
-firewall rules and the provider's security configuration must allow the
-traffic. On a local Minikube cluster, `minikube tunnel` may be needed to make
-LoadBalancer addresses available; keep it running in a separate terminal.
+Substitua o placeholder pelo endereço exibido por `kubectl get svc`. As regras
+de firewall e de segurança do provedor precisam permitir o tráfego. Em um
+cluster Minikube local, pode ser necessário executar `minikube tunnel` para
+disponibilizar os endereços LoadBalancer; mantenha o comando em outro
+terminal.
 
 ## LoadBalancer versus port-forward
 
-The history includes commands like:
+O histórico inclui comandos como:
 
 ```powershell
 kubectl port-forward svc/<service-name> 80:80
 kubectl --kubeconfig <path-to-kubeconfig> port-forward svc/<service-name> 80:80
 ```
 
-`port-forward` is a temporary connection from local port `80` to Service port
-`80`, tunneled through the Kubernetes API. It does **not** create a cloud load
-balancer, change the Service type, or provide a durable external address. It
-stays in the foreground until stopped.
+`port-forward` cria uma conexão temporária da porta local `80` para a porta
+`80` do Service, tunelada pela API Kubernetes. Ele **não** cria um
+balanceador de carga na nuvem, não altera o tipo do Service e não fornece um
+endereço externo permanente. O comando fica em primeiro plano até ser
+interrompido.
 
-By default, port-forward listens only on localhost. Adding
-`--address 0.0.0.0` listens on every local network interface, which can expose
-the application to other machines. Use that option only when exposure is
-intentional and network access is controlled. For local testing, a high local
-port (for example `8080:80`) usually avoids needing elevated privileges:
+Por padrão, port-forward escuta apenas em localhost. Adicionar
+`--address 0.0.0.0` faz com que escute em todas as interfaces de rede locais,
+o que pode expor a aplicação a outras máquinas. Use essa opção somente se a
+exposição for intencional e o acesso à rede estiver controlado. Para testes
+locais, uma porta local alta (por exemplo, `8080:80`) normalmente evita a
+necessidade de privilégios elevados:
 
 ```powershell
 kubectl port-forward svc/<service-name> 8080:80
 ```
 
-The `--kubeconfig` option selects a specific credentials/configuration file
-when the default context is not appropriate:
+A opção `--kubeconfig` seleciona um arquivo específico de
+configuração/credenciais quando o contexto padrão não for o desejado:
 
 ```powershell
 kubectl --kubeconfig <path-to-kubeconfig> get svc
 kubectl --kubeconfig <path-to-kubeconfig> port-forward svc/<service-name> 8080:80
 ```
 
-`sudo` is usually unnecessary for `kubectl`. Running it as root can select a
-different user's default kubeconfig and credentials; specify the intended
-`--kubeconfig` or configure the current user's access instead. Binding a local
-port below 1024, such as `80`, may also require elevated privileges on some
-operating systems.
+Normalmente, `kubectl` não precisa de `sudo`. Executá-lo como root pode usar o
+kubeconfig e as credenciais padrão de outro usuário; especifique o
+`--kubeconfig` desejado ou configure o acesso do usuário atual. Em alguns
+sistemas operacionais, vincular uma porta local abaixo de 1024, como `80`,
+também pode exigir privilégios elevados.

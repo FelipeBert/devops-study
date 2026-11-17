@@ -1,38 +1,39 @@
-# Minikube: essential commands
+# Minikube: comandos essenciais
 
-Minikube runs a local Kubernetes cluster for learning and development. Start
-Docker or another configured Minikube driver before creating the cluster.
+O Minikube executa um cluster Kubernetes local para estudo e desenvolvimento.
+Antes de criar o cluster, inicie o Docker ou outro driver configurado para
+o Minikube.
 
 ```powershell
-# Start a local cluster using the default profile.
+# Iniciar um cluster local usando o perfil padrão.
 minikube start
 
-# Start a named profile when you want more than one local cluster.
+# Iniciar um perfil nomeado para manter mais de um cluster local.
 minikube start -p study
 
-# Check cluster health and the active profile.
+# Verificar o estado do cluster e o perfil ativo.
 minikube status
 minikube profile
 
-# List local Minikube profiles.
+# Listar os perfis locais do Minikube.
 minikube profile list
 
-# Point kubectl at a Minikube profile's context.
+# Alterar o contexto do kubectl para o perfil do Minikube desejado.
 kubectl config use-context minikube
 kubectl config use-context study
 
-# Open the Kubernetes dashboard in a browser.
+# Abrir o dashboard do Kubernetes no navegador.
 minikube dashboard
 
-# Open a service exposed through a NodePort or supported service type.
+# Abrir um Service exposto por NodePort ou outro tipo compatível.
 minikube service <service-name>
 
-# Stop the cluster while preserving its data.
+# Parar o cluster sem apagar seus dados.
 minikube stop
 
-# Delete a profile and its cluster data (destructive).
+# Excluir um perfil e os dados do cluster (operação destrutiva).
 minikube delete -p study
 ```
 
-The default Minikube profile is named `minikube`. The selected profile/context
-determines which local cluster `kubectl` will control.
+O nome do perfil padrão do Minikube é `minikube`. O perfil e o contexto
+selecionados determinam qual cluster local será controlado pelo `kubectl`.
